@@ -1,0 +1,673 @@
+ Page 
+1
+ of 
+6
+85 Willow Rd, Menlo Park, CA 94025
+help@robinhood.com
+
+03/01/2021 to 03/31/2021
+Stephen Desposito
+ Account #:
+510236367
+617 Elm Ave, Takoma Park, MD 20912
+Options
+Equities
+Cash and Cash Equivalents
+Account Summary
+Opening Balance
+Closing Balance
+Net Account Balance
+$374.57
+$243.69
+Total Securities
+ $29.30
+$157.49
+Portfolio Value
+ $403.87
+$401.18
+Income and Expense Summary
+This Period
+Year to Date
+Dividends
+ $0.32
+$0.57
+Capital Gains Distributions
+$0.00
+$0.00
+Interest Earned
+ $0.00
+$0.00
+
+Portfolio Allocation
+Cash and Cash
+Equivalents
+60.74%
+Equities
+39.26%
+Options
+0.00%
+This statement shall be conclusive if not objected to in writing within ten days (except with respect to debit card transactions). 
+Errors and omissions exempted. 
+Please address all communications to the ﬁrm and not to the individuals.
+Address changes or other material changes in your account should be directed to the ofﬁce servicing your account. 
+Kindly mention your account number. 
+This statement should be retained for income tax purposes.
+!!!!!!PAGE BREAK!!!!!!!!!!!!!!!
+ Page 
+2
+ of 
+6
+Portfolio Summary
+Securities Held in Account
+Sym/Cusip
+Acct Type
+Qty
+Price
+Mkt Value
+Est. Dividend Yield
+% of Total Portfolio
+AMD
+Estimated Yield: 0.00%
+AMD
+Margin
+0.249205
+$78.50
+$19.56
+$0.00
+4.88%
+Purple Innovation
+Estimated Yield: 0.00%
+PRPL
+Margin
+1.154849
+$31.65
+$36.55
+$0.00
+9.11%
+Sociedad Quimica y Minera
+Estimated Yield: 0.54%
+SQM
+Margin
+0.379398
+$53.07
+$20.13
+$0.11
+5.02%
+Taiwan Semiconductor Manufacturing
+Estimated Yield: 1.18%
+TSM
+Margin
+0.252951
+$118.28
+$29.92
+$0.35
+7.46%
+Vanguard Value ETF
+Estimated Yield: 2.59%
+VTV
+Margin
+0.233081
+$131.46
+$30.64
+$0.79
+7.64%
+Vanguard Growth ETF
+Estimated Yield: 0.60%
+VUG
+Margin
+0.080478
+$257.04
+$20.69
+$0.13
+5.16%
+Total Securities
+ $157.49
+$1.38
+39.26%
+Brokerage Cash Balance
+ $243.69
+60.74%
+Total Priced Portfolio
+ $401.18
+!!!!!!PAGE BREAK!!!!!!!!!!!!!!!
+ Page 
+3
+ of 
+6
+Account Activity
+Description
+ Symbol
+Acct Type
+Transaction
+Date
+Qty
+Price
+Debit
+Credit
+Sociedad Quimica y Minera
+Unsolicited, CUSIP: 833635105
+ SQM
+Margin
+Sell
+02/25/2021
+0.354295
+$55.36
+$19.61
+Twitter
+Unsolicited, CUSIP: 90184L102
+ TWTR
+Margin
+Buy
+02/25/2021
+0.000249
+$80.24
+$0.02
+Twitter
+Unsolicited, CUSIP: 90184L102
+ TWTR
+Margin
+Buy
+02/25/2021
+0.124354
+$80.24
+$9.98
+Twitter
+Unsolicited, CUSIP: 90184L102
+ TWTR
+Margin
+Sell
+02/25/2021
+0.124603
+$79.60
+$9.92
+iShares Core US REIT ETF
+Unsolicited, CUSIP: 464288521
+ USRT
+Margin
+Sell
+02/25/2021
+0.204415
+$51.48
+$10.52
+AMD
+Unsolicited, CUSIP: 007903107
+ AMD
+Margin
+Buy
+02/26/2021
+0.234796
+$85.16
+$19.99
+AMD
+Unsolicited, CUSIP: 007903107
+ AMD
+Margin
+Buy
+02/26/2021
+0.000117
+$85.16
+$0.01
+VanEck Vectors Semiconductor ETF
+Unsolicited, CUSIP: 92189F676
+ SMH
+Margin
+Buy
+02/26/2021
+0.041359
+$241.78
+$10.00
+DocuSign
+Unsolicited, CUSIP: 256163106
+ DOCU
+Margin
+Buy
+03/01/2021
+0.125026
+$239.95
+$30.00
+NVIDIA
+Unsolicited, CUSIP: 67066G104
+ NVDA
+Margin
+Buy
+03/01/2021
+0.035952
+$556.29
+$20.00
+Square
+Unsolicited, CUSIP: 852234103
+ SQ
+Margin
+Buy
+03/01/2021
+0.083103
+$240.66
+$20.00
+GE
+Unsolicited, CUSIP: 369604103
+ GE
+Margin
+Buy
+03/03/2021
+1.527883
+$13.09
+$20.00
+NVIDIA
+Unsolicited, CUSIP: 67066G104
+ NVDA
+Margin
+Sell
+03/03/2021
+0.035952
+$531.47
+$19.11
+AMD
+Unsolicited, CUSIP: 007903107
+ AMD
+Margin
+Sell
+03/05/2021
+0.234913
+$77.73
+$18.26
+Cash Div: R/D 2021-02-23 P/D 2021-03-09 - 0.124011 shares at 1.01
+JNJ
+Margin
+CDIV
+03/09/2021
+ $0.13
+!!!!!!PAGE BREAK!!!!!!!!!!!!!!!
+ Page 
+4
+ of 
+6
+Account Activity
+Description
+ Symbol
+Acct Type
+Transaction
+Date
+Qty
+Price
+Debit
+Credit
+DocuSign
+Unsolicited, CUSIP: 256163106
+ DOCU
+Margin
+Sell
+03/05/2021
+0.125026
+$195.96
+$24.50
+GE
+Unsolicited, CUSIP: 369604103
+ GE
+Margin
+Sell
+03/05/2021
+1
+$13.50
+$13.50
+GE
+Unsolicited, CUSIP: 369604103
+ GE
+Margin
+Sell
+03/05/2021
+0.527883
+$13.50
+$7.13
+Purple Innovation
+Unsolicited, CUSIP: 74640Y106
+ PRPL
+Margin
+Buy
+03/05/2021
+0.036531
+$26.00
+$0.95
+Purple Innovation
+Unsolicited, CUSIP: 74640Y106
+ PRPL
+Margin
+Buy
+03/05/2021
+1
+$25.98
+$25.99
+Purple Innovation
+Unsolicited, CUSIP: 74640Y106
+ PRPL
+Margin
+Buy
+03/05/2021
+0.118318
+$25.82
+$3.06
+Square
+Unsolicited, CUSIP: 852234103
+ SQ
+Margin
+Sell
+03/05/2021
+0.083103
+$206.67
+$17.17
+VanEck Vectors Semiconductor ETF
+Unsolicited, CUSIP: 92189F676
+ SMH
+Margin
+Sell
+03/05/2021
+0.041359
+$220.90
+$9.14
+Vanguard Value ETF
+Unsolicited, CUSIP: 922908744
+ VTV
+Margin
+Buy
+03/08/2021
+0.232693
+$128.69
+$29.95
+Vanguard Value ETF
+Unsolicited, CUSIP: 922908744
+ VTV
+Margin
+Buy
+03/08/2021
+0.000388
+$128.69
+$0.05
+VanEck Vectors Semiconductor ETF
+Unsolicited, CUSIP: 92189F676
+ SMH
+Margin
+Buy
+03/09/2021
+0.131984
+$227.30
+$30.00
+Vanguard Growth ETF
+Unsolicited, CUSIP: 922908736
+ VUG
+Margin
+Buy
+03/09/2021
+0.080358
+$248.48
+$19.97
+Vanguard Growth ETF
+Unsolicited, CUSIP: 922908736
+ VUG
+Margin
+Buy
+03/09/2021
+0.00012
+$248.48
+$0.03
+Taiwan Semiconductor Manufacturing
+Unsolicited, CUSIP: 874039100
+ TSM
+Margin
+Buy
+03/12/2021
+0.252951
+$118.60
+$30.00
+VanEck Vectors Semiconductor ETF
+Unsolicited, CUSIP: 92189F676
+ SMH
+Margin
+Sell
+03/12/2021
+0.131984
+$228.60
+$30.17
+!!!!!!PAGE BREAK!!!!!!!!!!!!!!!
+ Page 
+5
+ of 
+6
+Account Activity
+Description
+ Symbol
+Acct Type
+Transaction
+Date
+Qty
+Price
+Debit
+Credit
+Pan American Silver
+Unsolicited, CUSIP: 697900108
+ PAAS
+Margin
+Buy
+03/19/2021
+0.593031
+$33.69
+$19.98
+Pan American Silver
+Unsolicited, CUSIP: 697900108
+ PAAS
+Margin
+Buy
+03/19/2021
+0.000593
+$33.69
+$0.02
+Pan American Silver
+Unsolicited, CUSIP: 697900108
+ PAAS
+Margin
+Sell
+03/19/2021
+0.593624
+$33.30
+$19.77
+AMD
+Unsolicited, CUSIP: 007903107
+ AMD
+Margin
+Buy
+03/22/2021
+0.249205
+$80.26
+$20.00
+Sociedad Quimica y Minera
+Unsolicited, CUSIP: 833635105
+ SQM
+Margin
+Buy
+03/24/2021
+0.379398
+$52.72
+$20.00
+Cash Div: R/D 2021-03-26 P/D 2021-03-30 - 0.080478 shares at 0.3809
+VUG
+Margin
+CDIV
+03/30/2021
+ $0.03
+Cash Div: R/D 2021-03-26 P/D 2021-03-30 - 0.233081 shares at 0.7062
+VTV
+Margin
+CDIV
+03/30/2021
+ $0.16
+Total Funds Paid and Received
+ $330.00
+$199.12
+Executed Trades Pending Settlement
+These transactions may not be reﬂected in the other summaries
+Description
+Acct Type
+Transaction
+Trade Date
+Settle Date
+Qty
+Price
+Debit
+Credit
+Total Executed Trades Pending Settlement
+ $0.00
+$0.00
+!!!!!!PAGE BREAK!!!!!!!!!!!!!!!
+ Page 
+6
+ of 
+6
+Important Information
+Robinhood Securities, LLC (“RHS”) carries your account as the clearing
+broker by arrangement with your introducing broker-dealer, Robinhood
+Financial LLC (“RHF”). If this is a margin account and we maintain a special
+miscellaneous account for you, this is a combined statement of your general
+account and special miscellaneous account maintained for you under
+Regulation T issued by the Board of Governors of the Federal Reserve
+System. The permanent record of the special miscellaneous account as
+required by Regulation T is available for your inspection at your request.
+The per annum rate of interest charged on debit balances in your account is
+shown on this statement. This rate may change from time to time in
+accordance with ﬂuctuations in interest rates. Interest is computed from the
+1st day of the month to the last day of the month. The interest is based on the
+average daily balance in your account with us, and for the actual number of
+days based on an interest year of 360 days. When calculating margin
+interest, free credit balances in all accounts will be offset against any debit in
+the margin account and the interest will be charged on the new debit balance.
+We are required to report to the Internal Revenue Service all cash dividends
+and interest credited to your account on securities held for you in our name.
+All dividends and interest credits should be included in your income tax
+return.
+Information relative 
+to fees and any other charges incurred in connection with
+listed option transactions occurring during the month has previously been
+furnished to you in conﬁrmation of such transactions. A summary of the
+information will be made available to you promptly upon request. Exercise
+assignment notices for option contracts are allocated among customer short
+positions pursuant to a manual procedure which randomly selects from
+amongst all customer short option positions including those contracts which
+are subject to exercise. All short American style option positions are liable for
+assignment at any time whereas European style options are assigned at
+expiration. A more detailed description of our random allocation procedure is
+available upon request.
+You are to promptly advise Robinhood of any material changes concerning
+your investment objectives or ﬁnancial situation by updating your information
+using the Robinhood platform or by contacting help@robinhood.com.
+Our ﬁnancial statement is available for your personal inspection; it can also
+be emailed to you upon request.
+RHS is a Member of SIPC, which protects securities customers of its
+members up to $500,000 (including $250,000 for claims for cash).
+Explanatory brochure available upon request or at www.sipc.org.
+Any free credit balances represent funds payable upon demand which,
+although properly accounted for on our books and records, is not segregated,
+and may be used in the conduct of this ﬁrm’s business as permissible under
+the SEC Rule 15c3-2.
+Notice to Customers
+
+RHS acts as clearing agent for your trades. Your account, which was
+introduced to us by RHF, is established under your name on a “fully disclosed”
+basis at RHS. You remain a customer of RHF.
+As required, under SEC rules, both the Firm’s Order Routing Report as well as
+information regarding speciﬁc order routing information is available free of
+charge upon request.
+As a clearing agent, we provide securities clearance and may provide order
+execution based on RHF instructions. RHS will not be involved with or have
+any responsibility for decisions regarding securities transactions in your
+account. RHF will be responsible for opening, approving and monitoring all
+activities in connection with your account. The entry of orders and any
+instructions regarding the deposit or withdrawal of securities or monies
+should be made through RHF.
+In addition to the above mentioned services, RHS will provide cashiering
+services, safeguarding of funds and securities while in our possession,
+monitoring compliance with applicable credit Regulation T and RHS internal
+policies, preparing and making accessible your account records (including
+transaction conﬁrmations and periodic statements of your account).
+The dividend totals reﬂected in the Income and Expense Summary are
+inclusive of both taxable and non-taxable dividends.
+Interest charges to your account may be based on the size and net debit
+balance during the interest period. These rates are subject to revision without
+notice in accordance with any changes in the broker call loan rate, as
+published in the Wall Street Journal. For more complete information regarding
+interest charges to customers, consult the RHF Fee Schedule, available at
+https://rbnhd.co/fees.
+We also offer Robinhood Cash Management as an additional feature of your
+account. 
+Robinhood Cash Management includes debit card access to your
+account and automatic sweep of uninvested cash to bank deposits. 
+If you
+participate in Robinhood Cash Management, your use of the debit card, and
+your rights with respect to debit card transactions, will be governed by the
+Robinhood Debit Card Agreement, which has been provided to you and is
+available at https://rbnhd.co/debit-card-agreement.
+In case of errors or questions about your electronic transfers, including your
+debit card transactions, or if you think your statement or receipt is wrong or if
+you need more information about a transaction listed on the statement or
+receipt, email Robinhood at help@robinhood.com. 
+Robinhood must hear from
+you no later than sixty (60) days after you were sent the FIRST statement on
+which the problem or error appeared.
+A
+. 
+Tell Robinhood your name and account number.
+B
+. 
+Describe the error or the transfer you are unsure about, and
+explain as clearly as you can why you believe it is an error or
+why you need more information.
+C
+. 
+Tell Robinhood the dollar amount of the suspected error.
+
+Robinhood will investigate your complaint and will correct any error promptly.
+If we take more than ten (10) business days to do this, we will credit your
+account for the amount you think is in error, so that you will have the use of
+the money during the time it takes Robinhood to complete our investigation.
+If you participate in Robinhood Cash Management, your uninvested cash is
+swept into accounts at FDIC-insured program banks, where your uninvested
+cash will earn interest from the program banks and be eligible for FDIC
+insurance up to applicable limits, subject to FDIC rules. 
+Please see the
+Robinhood Securities, LLC & Robinhood Financial LLC Insured Network
+Deposit Sweep Program Disclosures, available at https://rbnhd.co/ind-
+disclosure, for the terms and conditions of this sweep program, including
+information regarding FDIC insurance coverage.
+RHF and RHS are members of the Financial Industry Regulatory Authority, Inc.
+(“FINRA”), and we are required to inform you of the availability of the FINRA
+Investor Brochure, which contains information on FINRA BrokerCheck. You
+may contact FINRA at 800-289-9999 or via their website www.ﬁnra.org.
+RHS carries your account and acts as your custodian for funds and securities
+deposited with us directly by you, through RHF as a result of transactions we
+process to your account. Any suspected inaccuracy or discrepancy in your
+account statement must be promptly reported to RHF. In order to protect your
+rights, please conﬁrm any oral communications in writing and include your
+brokerage account number. 
+General inquiries or concerns regarding your
+account should be directed to: help@robinhood.com.
+The SEC requires all broker-dealers that route orders in equity securities and
+options to make available quarterly reports that present a general overview of
+their routing practices. The reports must identify the signiﬁcant venues to
+which customer orders were routed for execution during the applicable
+quarter and disclose the material aspects of the broker-dealers relationship
+with such venue. In addition, the Rule (SEC 606) requires broker-dealers to
+disclose, upon customer request, the venues to which the individual
+customer’s orders were routed for the six months prior to the request, and
+the execution time for the orders that were executed. For further information,
+please contact RHF.
+Statement of Financial Condition
+ 
+Robinhood Securities, LLC. audited Statement of Financial Condition as of
+December 31, 2020 is available on the Company’s website at
+www.robinhood.com/legal. A paper copy may be requested at no cost by
+calling 1-(800)-282-1327. On December 31, 2020, Robinhood Securities,
+LLC. had a net capital of $554,391,618, which was $486,817,019 in excess
+of its required net capital of $67,574,599.
+PLEASE RETAIN THIS STATEMENT AS IT WILL BE HELPFUL IN PREPARING
+YOUR INCOME TAX RETURNS AND MAY BE NEEDED ALONG WITH
+SUBSEQUENT STATEMENTS TO VERIFY INTEREST CHARGES IN YOUR
+ACCOUNT. THIS STATEMENT SHALL BE DEEMED CONCLUSIVE UNLESS
+OBJECTED TO IN WRITING WITHIN 10 BUSINESS DAYS.
+1568129
+!!!!!!PAGE BREAK!!!!!!!!!!!!!!!

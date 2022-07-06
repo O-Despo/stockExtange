@@ -2,10 +2,6 @@ from PyPDF2 import PdfReader
 import re
 import yfinance as yf
 
-input_file = PdfReader("testdoc.pdf")
-print(input_file.getPage(0).extract_text())
-print(input_file.metadata)
-
 #Exceptions
 class badPlatform(Exception):
     def __init__(self, platforms, platform, *args):
@@ -13,13 +9,11 @@ class badPlatform(Exception):
         self.platforms = platforms
         self.platform  = platform
 
-    def __str__(self):
-        return f"{self.platform} is not a available platform,\nAvailable Platforms {self.platforms.keys()}"
 
 class RobinHood():
     def __init__(self):
         self.platforms = {
-                "rh": "placehodler"
+                "rh": self.rh,
                 }
     
     def run(self, file_source, platform):
@@ -27,7 +21,21 @@ class RobinHood():
             raise badPlatform(self.platforms, platform)
         
         pdf = PdfReader(file_source)
-        output = self.rh(pdf)
+        output = self.platforms[platform](pdf)
+        
+        #Create list of all stocks on invoice
+        port_val_stocks = [i[0] for i in output["portInfo"]]
+        acount_sum_stocks = [i[0] for i in output["transactionsInfo"]]
+        all_stocks = set(port_val_stocks + acount_sum_stocks)
+        all_stocks_loss = dict(zip(all_stocks, [0, 0, 0] * len(all_stocks)))
+        
+        for tract in output["transactionsInfo"]:
+            if tract[1] == "Buy":
+                all_stocks[tract[0]][0] -= float(tract[2])
+            else:
+                all_stocks[tract[0]][1] += float(tract[2])
+
+        print(all_stocks)
         return output
 
     def rh(self, pdf):
@@ -38,17 +46,45 @@ class RobinHood():
 
         output = {
                 "portValue": None,
-                "dateRange": None
+                "dateRange": None,
+                "overallChange": None,
+                "portInfo": None,
+                "transactionsInfo": None,
                 }
+        # General info
+        to_float = lambda i: float(i) if i.replace(".","").isdigit() else i
+
         page_text_0 = pdf.pages[0].extract_text()
         port_value_extract = re.search(patterns["portValue"], page_text_0)
-        output["portValue"] = port_value_extract.group(1, 2)
+
+        output["portValue"] = [to_float(i) for i in port_value_extract.group(1, 2)]
+        output["overallChange"] = -(100 - output["portValue"][1]/(output["portValue"][0]/100))
         date_range_extract = re.search(patterns["dateRange"], page_text_0)
         output["dateRange"]  = date_range_extract.group(1, 2)
 
+        # transactions
+        acount_activity_ptrn = re.compile("Account Activity")
+        portfolio_summary_ptrn = re.compile("Portfolio Summary")
+
+        acount_activity = ""
+        portfolio_summary = "" 
+
+        for page in pdf.pages[:]:
+            text = page.extract_text()
+            if acount_activity_ptrn.search(text): acount_activity += text
+            elif portfolio_summary_ptrn.search(text): portfolio_summary += text
+
+        transaction_prtn = re.compile("CUSIP.*?\n (.*?)\n.*?\n(.*?)\n.*?\n.*?\n\$.*?\n\$(.*?)[\n, ]")
+        transactions = transaction_prtn.findall(acount_activity)
+        output["transactionsInfo"] = transactions
+
+        portfolio_prtn = re.compile("E.*?%\n(.*?)\n.*?(\n.*?)\n.*?\n\$(.*?)[\n, ]")
+        current_port_info = portfolio_prtn.findall(portfolio_summary)
+        output["portInfo"] = current_port_info
+
+        breakpoint()
         return output
 
 if __name__ == "__main__":
     rh = RobinHood()
-    out = rh.run("testdoc.pdf", "rh")
-    print(out)
+    out = rh.run("robinhood.pdf", "rh")
