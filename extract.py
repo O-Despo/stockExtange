@@ -27,13 +27,16 @@ class RobinHood():
         port_val_stocks = [i[0] for i in output["portInfo"]]
         acount_sum_stocks = [i[0] for i in output["transactionsInfo"]]
         all_stocks = set(port_val_stocks + acount_sum_stocks)
-        all_stocks_loss = dict(zip(all_stocks, [0, 0, 0] * len(all_stocks)))
+        all_stocks = dict(zip(all_stocks, [0, 0, 0]))
         
+        breakpoint()
         for tract in output["transactionsInfo"]:
             if tract[1] == "Buy":
-                all_stocks[tract[0]][0] -= float(tract[2])
+                all_stocks[tract[0]][0] -= float(tract[3])
+                all_stocks[tract[0]][2] -= float(tract[2])
             else:
-                all_stocks[tract[0]][1] += float(tract[2])
+                all_stocks[tract[0]][1] += float(tract[3])
+                all_stocks[tract[0]][2] += float(tract[2])
 
         print(all_stocks)
         return output
@@ -74,7 +77,7 @@ class RobinHood():
             if acount_activity_ptrn.search(text): acount_activity += text
             elif portfolio_summary_ptrn.search(text): portfolio_summary += text
 
-        transaction_prtn = re.compile("CUSIP.*?\n (.*?)\n.*?\n(.*?)\n.*?\n.*?\n\$.*?\n\$(.*?)[\n, ]")
+        transaction_prtn = re.compile("CUSIP.*?\n (.*?)\n.*?\n(.*?)\n.*?\n(.*?)\n\$.*?\n\$(.*?)[\n, ]")
         transactions = transaction_prtn.findall(acount_activity)
         output["transactionsInfo"] = transactions
 
@@ -82,7 +85,6 @@ class RobinHood():
         current_port_info = portfolio_prtn.findall(portfolio_summary)
         output["portInfo"] = current_port_info
 
-        breakpoint()
         return output
 
 if __name__ == "__main__":
