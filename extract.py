@@ -22,24 +22,61 @@ class RobinHood():
         
         pdf = PdfReader(file_source)
         output = self.platforms[platform](pdf)
-        print(output)
-        breakpoint
+
+        #Transform port and transactions into dict
+        transactions = {transaction[0]: [] for transaction in output["transactionsInfo"]}
+        for transaction in output["transactionsInfo"]:
+            transactions[transaction[0]].append({
+                    "type": transaction[1],
+                    "amount": float(transaction[2]),
+                    "value": float(transaction[3]),
+                    })
         
-        #Create list of all stocks on invoice
-        port_val_stocks = [i[0] for i in output["portInfo"]]
-        acount_sum_stocks = [i[0] for i in output["transactionsInfo"]]
-        all_stocks = set(port_val_stocks + acount_sum_stocks)
-        blank_values = [[0,0,0,0] for i in range(len(all_stocks))]
-        all_stocks = dict(zip(all_stocks, blank_values))
+        port = {}
+        for stock in output["portInfo"]:
+            port[stock[0]] = {
+                    "amount": float(stock[1]),
+                    "value": float(stock[2]),
+                    }
         
-        for tract in output["transactionsInfo"]:
-            if tract[1] == "Buy":
-                all_stocks[tract[0]][0] -= float(tract[3])
-                all_stocks[tract[0]][2] += float(tract[2])
-            else:
-                all_stocks[tract[0]][1] += float(tract[3])
-                all_stocks[tract[0]][2] -= float(tract[2])
+        all_stocks = dict.fromkeys(list(port.keys()) + list(transactions.keys()))
+
+        for ticker in transactions.keys():
+            debit = 0
+            credit = 0 
+            transacted_amount = 0
+            for transaction in transactions[ticker]:
+                if transaction['type'] == "Buy":
+                    debit += transaction["value"]
+                    transacted_amount += transaction["amount"]
+                else:
+                    credit += transaction["value"]
+                    transacted_amount -= transaction["amount"]
             
+            all_stocks[ticker] = {
+                    "transactedAmount": transacted_amount, 
+                    "debit": debit, 
+                    "credit": credit,
+                    }
+        
+        starting_amount = {}
+        for ticker in port.keys():
+            starting_amount[ticker] = port[ticker]["amount"] - all_stocks[ticker]["transactedAmount"]
+        tickers_to_pull = ""
+        for ticker in starting_amount.keys():
+            tickers_to_pull += ticker + " "
+        # Pull down ticker data
+        # Add orinal dbit to caluation
+        # Calcuate overall returns
+
+                
+        breakpoint()
+        amount_held_start = {}
+        
+
+                    
+
+       # for ticker in all_stocks.keys():
 
         portInfo = {}
         breakpoint()
