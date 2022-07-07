@@ -22,22 +22,42 @@ class RobinHood():
         
         pdf = PdfReader(file_source)
         output = self.platforms[platform](pdf)
+        print(output)
+        breakpoint
         
         #Create list of all stocks on invoice
         port_val_stocks = [i[0] for i in output["portInfo"]]
         acount_sum_stocks = [i[0] for i in output["transactionsInfo"]]
         all_stocks = set(port_val_stocks + acount_sum_stocks)
-        all_stocks = dict(zip(all_stocks, [0, 0, 0]))
+        blank_values = [[0,0,0,0] for i in range(len(all_stocks))]
+        all_stocks = dict(zip(all_stocks, blank_values))
         
-        breakpoint()
         for tract in output["transactionsInfo"]:
             if tract[1] == "Buy":
                 all_stocks[tract[0]][0] -= float(tract[3])
-                all_stocks[tract[0]][2] -= float(tract[2])
+                all_stocks[tract[0]][2] += float(tract[2])
             else:
                 all_stocks[tract[0]][1] += float(tract[3])
-                all_stocks[tract[0]][2] += float(tract[2])
+                all_stocks[tract[0]][2] -= float(tract[2])
+            
 
+        portInfo = {}
+        breakpoint()
+        for stock in output["portInfo"]:
+            portInfo[stock[0]] = {
+                        "amount": stock[1],
+                        "value": stock[2]
+                        }
+
+        for stock in all_stocks.items():
+            if stock[0] in portInfo.keys():
+                stock[1][3] = float(portInfo[stock[0]]["amount"]) - stock[1][2]
+            else:
+                stock[1][3] = - stock[1][2]
+        
+        for stock in all_stocks.items():
+            ticker = yf.download(stock[0])
+            
         print(all_stocks)
         return output
 
@@ -81,7 +101,7 @@ class RobinHood():
         transactions = transaction_prtn.findall(acount_activity)
         output["transactionsInfo"] = transactions
 
-        portfolio_prtn = re.compile("E.*?%\n(.*?)\n.*?(\n.*?)\n.*?\n\$(.*?)[\n, ]")
+        portfolio_prtn = re.compile("E.*?%\n(.*?)\n.*?\n(.*?)\n.*?\n\$(.*?)[\n, ]")
         current_port_info = portfolio_prtn.findall(portfolio_summary)
         output["portInfo"] = current_port_info
 
