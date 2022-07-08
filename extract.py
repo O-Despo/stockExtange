@@ -54,47 +54,41 @@ class RobinHood():
                     transacted_amount -= transaction["amount"]
             
             all_stocks[ticker] = {
-                    "transactedAmount": transacted_amount, 
-                    "debit": debit, 
-                    "credit": credit,
+                    "transactedAmount": round(transacted_amount, 5), 
+                    "debit": round(debit, 2), 
+                    "credit": round(credit, 2),
                     }
         
         starting_amount = {}
-        for ticker in port.keys():
-            starting_amount[ticker] = port[ticker]["amount"] - all_stocks[ticker]["transactedAmount"]
+        breakpoint()
+        for ticker in all_stocks.keys():
+            if port.get(ticker):
+                starting_amount[ticker] = port[ticker]["amount"] - all_stocks[ticker]["transactedAmount"]
+            else:
+                starting_amount[ticker] = -all_stocks[ticker]["transactedAmount"]
         tickers_to_pull = ""
+
         for ticker in starting_amount.keys():
             tickers_to_pull += ticker + " "
-        # Pull down ticker data
-        # Add orinal dbit to caluation
-        # Calcuate overall returns
 
-                
-        breakpoint()
-        amount_held_start = {}
-        
+        #Format date to %Y-%M-%D
+        date = output["dateRange"][0]
+        date = f"{date[6:]}-{date[0:2]}-{date[3:5]}"
+        date_end = f"{date[0:8]}{int(date[8:10]) + 1}"
 
-                    
-
-       # for ticker in all_stocks.keys():
-
-        portInfo = {}
-        breakpoint()
-        for stock in output["portInfo"]:
-            portInfo[stock[0]] = {
-                        "amount": stock[1],
-                        "value": stock[2]
-                        }
-
-        for stock in all_stocks.items():
-            if stock[0] in portInfo.keys():
-                stock[1][3] = float(portInfo[stock[0]]["amount"]) - stock[1][2]
-            else:
-                stock[1][3] = - stock[1][2]
+        ticker_data = yf.download(tickers=tickers_to_pull, start=date, end=date_end, interval="1d")
+       
+        for stock in starting_amount.items():
+            all_stocks[stock[0]]["debit"] += round(ticker_data.at[date, ("Close", stock[0])] * stock[1], 2)
+            if port.get(stock[0]):
+                all_stocks[stock[0]]["credit"] += port[stock[0]]["value"]
         
         for stock in all_stocks.items():
-            ticker = yf.download(stock[0])
-            
+            print(stock[0], stock[1]["debit"])
+        breakpoint()
+        for stock in all_stocks.items():
+            all_stocks[stock[0]]["yield"] = round((stock[1]["credit"] - stock[1]["debit"])/stock[1]["debit"] * 100, 4)
+
         print(all_stocks)
         return output
 
