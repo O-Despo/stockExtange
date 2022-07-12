@@ -8,7 +8,7 @@ class badPlatform(Exception):
         self.platforms = platforms
         self.platform  = platform
 
-class RobinHood():
+class pdfExtract():
     def __init__(self):
         self.platforms = {
                 "rh": self.rh,
@@ -27,7 +27,7 @@ class RobinHood():
 
         #Transform port and transactions into dict
         port = output["portInfo"]
-        transactions = output["transactionsInfo"]
+        transactions = output["transactionHistory"]
         all_stocks = dict.fromkeys(list(port.keys()) + list(transactions.keys()))
         
         #Compute the debit and credit from each tranaction
@@ -35,33 +35,33 @@ class RobinHood():
         for ticker in transactions.keys():
             debit = 0
             credit = 0 
-            transacted_amount = 0
+            absoluteVolumeTransacted = 0
 
             for transaction in transactions[ticker]:
                 if transaction['type'] == "Buy":
                     debit += transaction["value"]
-                    transacted_amount += transaction["amount"]
+                    absoluteVolumeTransacted += transaction["amount"]
                 else:
                     credit += transaction["value"]
-                    transacted_amount -= transaction["amount"]
+                    absoluteVolumeTransacted -= transaction["amount"]
             
             if port.get(ticker):
-                starting_amount = port[ticker]["amount"] - transacted_amount
+                volume_at_term_start = port[ticker]["amount"] - absoluteVolumeTransacted
             else:
-                starting_amount = - transacted_amount
+                volume_at_term_start = - absoluteVolumeTransacted
 
             all_stocks[ticker] = {
-                    "transactedAmount": round(transacted_amount, 5), 
-                    "debit": round(debit, 2), 
-                    "credit": round(credit, 2),
-                    "startingAmount": starting_amount,
+                    "absoluteVolumeTransacted": round(absoluteVolumeTransacted, 5), 
+                    "debit": debit, 
+                    "credit": credit,
+                    "volumeAtTermStart": volume_at_term_start,
                     }
 
-            if starting_amount != 0:
+            if volume_at_term_start != 0:
                stock_to_pull += ticker + " " 
 
         #Downloads history
-        ticker_data = yf.download(tickers=stock_to_pull, start=output["dates"][0], end=output["dates"][1], interval="1d")
+        ticker_data = yf.download(tickers=stock_to_pull, start=self.start_date, end=self.end_date, interval="1d")
         ticker_data = ticker_data.to_dict()
 
         #Calulate yeild
@@ -69,13 +69,17 @@ class RobinHood():
             close = ticker_data.get(("Close", stock[0]))
             if close != None:
                 close = list(close.values())[0]
-                all_stocks[stock[0]]["debit"] += round(close * stock[1]["startingAmount"], 2)
+                all_stocks[stock[0]]["debit"] += close * stock[1]["volumeAtTermStart"]
 
             if port.get(stock[0]):
                 all_stocks[stock[0]]["credit"] += port[stock[0]]["value"]
 
-            stock[1]["yield"] = round((stock[1]["credit"] - stock[1]["debit"])/stock[1]["debit"] * 100, 4)
+            stock[1]["yield"] = (stock[1]["credit"] - stock[1]["debit"])/stock[1]["debit"] * 100
 
+            for stock_values in stock[1].items():
+                stock[1][stock_values[0]] = round(stock_values[1], 2)
+
+        output["summary"] = all_stocks
         return output
 
     def rh(self, pdf):
@@ -88,10 +92,11 @@ class RobinHood():
 
         output = {
                 "portValue": None,
-                "dates": [],
+                "dateRange": None,
+                "term": None,
                 "overallChange": None,
                 "portInfo": None,
-                "transactionsInfo": None,
+                "transactionHistory": None,
                 }
 
         #Process text
@@ -107,19 +112,24 @@ class RobinHood():
         #Process basic stats
         output["portValue"] = [to_float(i) for i in port_value_extract.group(1, 2)]
         output["overallChange"] = -(100 - output["portValue"][1]/(output["portValue"][0]/100))
+
         date_range_extract = re.search(patterns["dateRange"], text)
-        date = date_range_extract.group(1, 2)[0]
+        output["dateRange"] = date_range_extract.group(1, 2)
+
 
         #Format date to %Y-%M-%D
-        output["dates"].append(f"{date[6:]}-{date[0:2]}-{date[3:5]}")
-        output["dates"].append(f"{output['dates'][0][0:8]}{int(output['dates'][0][8:10]) + 1}")
+        date = date_range_extract.group(1, 2)[0]
+        output["term"] = f"{date[6:]}-{date[0:2]}"
+
+        self.start_date = f"{date[6:]}-{date[0:2]}-{date[3:5]}"
+        self.end_date = f"{self.start_date[0:8]}{int(self.start_date[8:10]) + 1}"
 
         #Transactions
         transactions = patterns["transactions"].findall(text)
-        output["transactionsInfo"] = transactions
+        output["transactionHistory"] = transactions
 
-        transactions = {transaction[0]: [] for transaction in output["transactionsInfo"]}
-        for transaction in output["transactionsInfo"]:
+        transactions = {transaction[0]: [] for transaction in output["transactionHistory"]}
+        for transaction in output["transactionHistory"]:
             transactions[transaction[0]].append({
                     "type": transaction[1],
                     "amount": float(transaction[2]),
@@ -138,9 +148,11 @@ class RobinHood():
                     }
  
         output["portInfo"] = port
-        output["transactionsInfo"] = transactions
+        output["transactionHistory"] = transactions
         return output
 
 if __name__ == "__main__":
-    rh = RobinHood()
+    import json
+    rh = pdfExtract()
     out = rh.run("robinhood.pdf", "rh")
+    print(json.dumps(out, sort_keys=True, indent=4))

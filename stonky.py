@@ -66,17 +66,20 @@ class stonky(discord.Client):
         pass
 
     async def dataDownload(self, parsed_content, msg):
-        if len(parsed_content) > 1:
-            response = self.user_col.find({"discord_id", msg.author.id})
+        if len(parsed_content) == 1:
+            response = self.user_col.find_one({"discord_id": msg.author.id})
+            #_id must be removed so as json cannot serialize _id type
+            del response["_id"]
             
-            file_name = str(uuid.uuid1()) + json
+            file_name = str(uuid.uuid1()) + ".json"
             with open(file_name, "w+") as json_out:
                 json.dump(response, json_out)
 
-            discord_file = discord.file(file_name)
-            msg.author.send(discord_file)
+            discord_file = discord.File(file_name)
+            await msg.author.send(file=discord_file)
+            await msg.author.send("data")
 
-            os.rm(file_name)
+            os.remove(file_name)
 
     async def process(self, parsed_content, msg):
         #Error check
@@ -110,9 +113,9 @@ class stonky(discord.Client):
             data = self.pdf_extract.run(file_name, parsed_content[1])
             
             os.remove(file_name)
-
-            term_date = data["dates"][0][0:7]
-            term_entry = {term_date: data}
+            
+            term = data["term"]
+            term_entry = {data["term"]: data}
             
             user_entry = self.user_col.find_one({"discord_id": msg.author.id})
             
@@ -120,8 +123,8 @@ class stonky(discord.Client):
             if "o" in parsed_content: overwite = True
             else: overwite = False
 
-            if user_entry and term_date in user_entry["terms"].keys() and overwite == False:
-                msg.author.send(f"the term {term_date} has already been added add `:o` to overwrite the term")
+            if user_entry and term in user_entry["terms"].keys() and overwite == False:
+                await msg.author.send(f"the term {term} has already been added add `:o` to overwrite the term")
                 return
 
             if user_entry == None:
@@ -135,9 +138,9 @@ class stonky(discord.Client):
                 user_entry["terms"].update(term_entry)
                 self.user_col.update_one({"discord_id": msg.author.id}, {"$set":{"terms": user_entry["terms"]}})
 
-            self.log.info(f"TERM made for {msg.author.id} date {term_date}")
+            self.log.info(f"TERM made for {msg.author.id} date {term}")
 
-            await msg.author.send(f"Sucess entry made for {term_date}")
+            await msg.author.send(f"Sucess entry made for {term}")
             
     async def delete(self, parsed_content, msg):
         """create a deletion confoamtion code"""
@@ -189,8 +192,6 @@ class stonky(discord.Client):
         delele_outcome = self.user_col.find_one_and_delete({"discord_id": msg.author.id})
         if delele_outcome == None:
             await msg.author.send("your information has already been removed from or was never on our servers")
-        else:
-            await msg.author.send("Removed awaiting conformation")
 
         #TODO removed from logs
         if self.user_col.find_one({"discord_id": msg.author.id}) == None: 
@@ -229,6 +230,7 @@ class stonky(discord.Client):
         text_content = msg.clean_content.lower()
         
         if text_content[0] != os.getenv("MSG_ID"): return
+        self.log.debug(f"Message recieved:{text_content}")
         
         text_content = text_content[1:]
         text_content = text_content.replace(" ", "")
