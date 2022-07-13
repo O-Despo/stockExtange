@@ -48,9 +48,17 @@ class stonky(discord.Client):
                 "stats": self.stats
         }
 
+        self.default_malform_criteria = {
+                "number_of_args": None,
+                "args_are_in": None,
+                "attachments_required": None,
+                "attachment_content_type": None,
+                }
+
         self.delete_codes = {}
 
         #db
+        self.getBoardCats = ["overall", "singleStock"]
         self.start_db_connection()
 
     def start_db_connection(self):
@@ -61,11 +69,84 @@ class stonky(discord.Client):
 
         self.log.debug(f"Connected to db {os.getenv('MONGO_URL')}")
 
-    async def updateLeaderboard(self, msg_part, msg):
+    async def getLeaderboard(self, msg_parts, msg):
+        """gets the leaderboard for a given term"""
+        get_leaderboard_malform_detect = self.default_malform_criteria.copy()
+        get_leaderboard_malform_detect["number_of_args"] = 2
+        get_leaderboard_malform_detect["args_are_in"] = [self.getBoardCats, None]
+        
+        malformed = self.malformDetection(get_leaderboard_malform_detect, msg)
+        if malformed[0]:
+            await msg.author.send("COMMAND_MALFORMED\n" + malformed[1])
+            return 3
+
+        args = malformed[2]
+        
+        self.updateLeaderboard(arg[1])
+        db_response = sell.leader_col.find_one({
+            "term": args[0]
+            })
+
+        await msg.author.send(db_response["stings"][args[1]])
+        return 0
+
+
+    async def updateLeaderboard(self, term):
         pass
 
-    async def getLeaderboard(self, msg_parts, msg):
-        pass
+    def malformDetection(self, criteria, msg):
+        """detects malformation given a set of criteria"""
+        malformed = False
+        malformMessage = ""
+
+        args = msg.clean_content.split(" ")[1:]
+
+        if criteria["number_of_args"] != None:
+            num_of_args = criteria["number_of_args"]
+            
+            if type(number_of_args) == list:
+                #Only for development
+                if len(number_of_args) != 2:
+                    self.log.ERROR("incorect number of args suplied as criteria to malformDetection")
+                    raise AssertionError("wrong number of argumnets in number_of_args criteria")
+                
+                #code that will hit user
+                if len(args) < number_of_args[0]:
+                    malformMessage += "Not enough arguments suplied: expected minimum of {number_of_args[0]}"
+                elif len(args) < number_of_args[1]:
+                    malformMessage += "To many arguments suplied: expected maximun of {number_of_args[0]}"
+            else:
+                if len(args) != number_of_args:
+                    malformMessage += "Incorect amount of argumnets: expected {number_of_args}"
+
+        #if criteria["type_of_args"] != None:
+        #    type_of_args = criteria["type_of_args"]
+
+        if criteria["args_are_in"] != None:
+            for i, arg in enumerate(args):
+                if criteria["args_are_in"][i] != None:
+                    possible_args_list =  criteria["args_are_in"][i]
+                    if arg not in possible_args_list:
+                        #format possible args
+                        possible_args_list_str = ""
+                        for possible_arg in possible_args_list:
+                            possible_args_list_str += ", " + possible_arg
+
+                        malformMessage += f"\"{arg}\" must be one of the following:{possible_args_list_str}\n"
+
+        if criteria['attachments_required'] != None:
+            if len(msg.attachments) == 0:
+                    malformMessage += "A attachment is required"
+
+        if criteria["attachment_content_type"] != None:
+            for attachment in msg.attachments:
+                if attachment.content_type != criteria["attachment_content_type"]:
+                    malformMessage += f"{attachment.file_name} has the wrong type expected {criteria_content_type} fot {attachment.content_type}"
+
+        if malformMessage != "":
+            return (False, malformMessage)
+        else:
+            return (True, "message not malformed")
 
     async def stats(self):
         pass
@@ -157,9 +238,9 @@ class stonky(discord.Client):
 
         #Error handling
         errorMsg = ""
-        user_has_code = self.userHasDeleteCode(msg) 
-
-        if user_has_code[0] == False: errorMsg += user_has_code[1]
+        #user_has_code = self.userHasDeleteCode(msg) 
+        #TODO remove delete code timrout
+        #if user_has_code[0] == False: errorMsg += user_has_code[1]
         if self.user_col.find_one({"discord_id": msg.author.id}) == None: errorMsg += "Nothing to delete\n"
          
         if errorMsg != "":
@@ -239,7 +320,6 @@ class stonky(discord.Client):
         """returns a given query"""
         self.possible.querys = {
                 }
-        pass
 
     async def dmProcessMsg(self, parsed_content, msg):
         if parsed_content[0] in self.dmActions.keys():
@@ -266,7 +346,7 @@ class stonky(discord.Client):
         
         if text_content[0] != os.getenv("MSG_ID"): return
         self.log.debug(f"Message recieved:{text_content}")
-        
+
         #clean text input
         text_content = text_content[1:]
         text_content = text_content.replace(" ", "")
