@@ -38,15 +38,17 @@ class stonky(discord.Client):
         self.dmActions = {
                 "process": self.process,
                 "query": self.query,
-                "delete": self.delete,
+                "delete": self.deleteAll,
                 "deleteconfirm": self.deleteConfirm,
                 "datadownload": self.dataDownload
                 }       
         
         self.actions = {
-                "leaderBoard": self.board,
+                "leaderBoard": self.getLeaderboard,
                 "stats": self.stats
         }
+
+        self.delete_codes = {}
 
         #db
         self.start_db_connection()
@@ -59,15 +61,23 @@ class stonky(discord.Client):
 
         self.log.debug(f"Connected to db {os.getenv('MONGO_URL')}")
 
-    async def board(self):
+    async def updateLeaderboard(self, msg_part, msg):
+        pass
+
+    async def getLeaderboard(self, msg_parts, msg):
         pass
 
     async def stats(self):
         pass
 
     async def dataDownload(self, parsed_content, msg):
+        """downloads all the data stored on the Stonky server"""
         if len(parsed_content) == 1:
             response = self.user_col.find_one({"discord_id": msg.author.id})
+
+            if response == None:
+                await msg.author.send("You have no data stored")
+                return
             #_id must be removed so as json cannot serialize _id type
             del response["_id"]
             
@@ -78,7 +88,6 @@ class stonky(discord.Client):
             discord_file = discord.File(file_name)
             await msg.author.send(file=discord_file)
             await msg.author.send("data")
-
             os.remove(file_name)
 
     async def process(self, parsed_content, msg):
@@ -142,61 +151,87 @@ class stonky(discord.Client):
 
             await msg.author.send(f"Sucess entry made for {term}")
             
-    async def delete(self, parsed_content, msg):
+    async def deleteAll(self, parsed_content, msg):
         """create a deletion confoamtion code"""
+        self.checkDeleteCodeTimeouts()
+
+        #Error handling
+        errorMsg = ""
+        user_has_code = self.userHasDeleteCode(msg) 
+
+        if user_has_code[0] == False: errorMsg += user_has_code[1]
+        if self.user_col.find_one({"discord_id": msg.author.id}) == None: errorMsg += "Nothing to delete\n"
+         
+        if errorMsg != "":
+            await msg.author.send(errorMsg)
+            return 0
+
+        #Generation Logic
         code = random.randint(1000,9999)
-        tries = 0
+        self.delete_codes[msg.author.id] = {"timeout": time.time() + 1, "code":  code}
 
-        #Error hadnling
-        in_db = self.user_col.find_one({"discord_id": msg.author.id})
+        await msg.author.send(f"your deletion token is {code}\nto inriversablely delete all your data type `#deleteconfirm:{code}")
+        self.log.debug(f"{msg.autho.id} created a delete code {code}")
+        return 1
 
-        if not in_db:
-            await msg.author.send("your data is not present there is nothing to delete")
+    def checkDeleteCodeTimeouts(self):
+        """cleans the delete codes stack"""
+        for delete_code_item in self.delete_codes.items():
+            if delete_code_item[1]["timeout"] < time.time():
+                del self.delete_codes[delete_code_item[0]]
+                self.log.debug("{msg.author.id} delete code {delete_code_item[1]['code'] removed due to timeout")
 
-        while(code in self.delete_tokens.keys()):
-            code = random.randint(999,1000)
+    def validDeleteCode(self, code, msg):
+        """verifys deletiond code returns (verifies_status:bool, msg)"""
+        vaild = True
+        returnMsg = ""
 
-            tries += 1
-            if tries >= 10:
-                await msg.author.send("failed to generate code try again")
-                return
+        hasCode = self.userHasDeleteCode(msg)
+        if hasCode[0]:
+            if (self.delete_codes[msg.author.id]["code"] == code) == False:
+                vaild = False
+                returnMsg += "that dose not match your current deletion code"
+        else:
+            valid = False
+            returnMsg += hasCode[1]
+        return (vaild, returnMsg)
             
-        self.delete_tokens[str(code)] = {"timeout": time.time() + 120, "id":  msg.author.id}
+    def userHasDeleteCode(self, msg):
+        """checks if a user already has a deletion code"""
+        hasCode = False
+        returnMsg = ""
 
-        await msg.author.send(f"your deletion token is {code}\nto inriversable delete all your data type `#deleteconfirm:{code}")
+        if msg.author.id in self.delete_codes.keys(): 
+            hasCode = True
+            returnMsg += f"{msg.author.name} already has a deletion code {self.delete_codes[msg.author.id]}\n"
         
+        return (hasCode, returnMsg)
         
     async def deleteConfirm(self, parsed_content, msg):
-        """Removes all data of user"""
+        """Removes all data of user after taking in verified deletion code"""
         #Error correction
+        self.checkDeleteCodeTimeouts()
         error_msg = ""
+       
         if len(parsed_content) != 2:
-            error_msg += "please add in the forms of `#deleteconfirm:CODE'\nif you need a code use '#delete'"
-        elif parsed_content[1] not in self.delete_tokens.keys(): 
-            print(parsed_content)
-            print(self.delete_tokens)
-            error_msg += "that is not a register delection token"
-        
-        elif self.delete_tokens[parsed_content[1]]["timeout"] < time.time():
-            error_msg += "This token is older than 2 minutes and is invalid\n"
-            del self.delete_tokens[parsed_content[1]]
-            error_msg += "This token has been removed\n"
-
-        elif self.delete_tokens[parsed_content[1]]["id"] != msg.author.id:
-            error_msg += "This token registered under another user"
-
-        if error_msg:
+            error_msg += "please ensure the command takes the form deleteConfirm:code"
             await msg.author.send(error_msg)
-            return
+            return 0
+        
+        code = parsed_content[1]
+        valid_code = self.validDeleteCode(code, msg)
+        if valid_code[0] == False:
+            error_msg += valid_code[1]
+            await msg.author.send(error_msg)
+            return 0
 
         delele_outcome = self.user_col.find_one_and_delete({"discord_id": msg.author.id})
         if delele_outcome == None:
             await msg.author.send("your information has already been removed from or was never on our servers")
+        self.log.debug(f"{msg.author.id} deleted all data useing code {parsed_content[1]})")
 
-        #TODO removed from logs
         if self.user_col.find_one({"discord_id": msg.author.id}) == None: 
-            await msg.author.send("Information removed : CONFERMED")
-
+            await msg.author.send("Information removed : CONFIRMED")
         else:
             await msg.author.send("failed contact dev")
 
@@ -232,11 +267,12 @@ class stonky(discord.Client):
         if text_content[0] != os.getenv("MSG_ID"): return
         self.log.debug(f"Message recieved:{text_content}")
         
+        #clean text input
         text_content = text_content[1:]
         text_content = text_content.replace(" ", "")
         content_parse = text_content.split(":")
-        #TODO remain charater 
 
+        #TODO remain charater 
         if content_parse[0] in self.simple_msgs:
             await msg.author.send(self.simple_msgs[content_parse[0]])
 

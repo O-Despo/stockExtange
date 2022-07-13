@@ -1,0 +1,348 @@
+[{
+  "_id": {
+    "$oid": "62cf25b59683b87de39dd609"
+  },
+  "discord_id": {
+    "$numberLong": "362997954472312833"
+  },
+  "terms": {
+    "2021-03": {
+      "portValue": [
+        403.87,
+        401.18
+      ],
+      "dateRange": [
+        "03/01/2021",
+        "03/31/2021"
+      ],
+      "term": "2021-03",
+      "overallChange": -0.6660559090796596,
+      "portInfo": {
+        "AMD": {
+          "amount": 0.249205,
+          "value": 19.56
+        },
+        "PRPL": {
+          "amount": 1.154849,
+          "value": 36.55
+        },
+        "SQM": {
+          "amount": 0.379398,
+          "value": 20.13
+        },
+        "TSM": {
+          "amount": 0.252951,
+          "value": 29.92
+        },
+        "VTV": {
+          "amount": 0.233081,
+          "value": 30.64
+        },
+        "VUG": {
+          "amount": 0.080478,
+          "value": 20.69
+        }
+      },
+      "transactionHistory": {
+        "SQM": [
+          {
+            "type": "Sell",
+            "amount": 0.354295,
+            "value": 19.61
+          },
+          {
+            "type": "Buy",
+            "amount": 0.379398,
+            "value": 20
+          }
+        ],
+        "TWTR": [
+          {
+            "type": "Buy",
+            "amount": 0.000249,
+            "value": 0.02
+          },
+          {
+            "type": "Buy",
+            "amount": 0.124354,
+            "value": 9.98
+          },
+          {
+            "type": "Sell",
+            "amount": 0.124603,
+            "value": 9.92
+          }
+        ],
+        "USRT": [
+          {
+            "type": "Sell",
+            "amount": 0.204415,
+            "value": 10.52
+          }
+        ],
+        "AMD": [
+          {
+            "type": "Buy",
+            "amount": 0.234796,
+            "value": 19.99
+          },
+          {
+            "type": "Buy",
+            "amount": 0.000117,
+            "value": 0.01
+          },
+          {
+            "type": "Sell",
+            "amount": 0.234913,
+            "value": 18.26
+          },
+          {
+            "type": "Buy",
+            "amount": 0.249205,
+            "value": 20
+          }
+        ],
+        "SMH": [
+          {
+            "type": "Buy",
+            "amount": 0.041359,
+            "value": 10
+          },
+          {
+            "type": "Sell",
+            "amount": 0.041359,
+            "value": 9.14
+          },
+          {
+            "type": "Buy",
+            "amount": 0.131984,
+            "value": 30
+          },
+          {
+            "type": "Sell",
+            "amount": 0.131984,
+            "value": 30.17
+          }
+        ],
+        "DOCU": [
+          {
+            "type": "Buy",
+            "amount": 0.125026,
+            "value": 30
+          },
+          {
+            "type": "Sell",
+            "amount": 0.125026,
+            "value": 24.5
+          }
+        ],
+        "NVDA": [
+          {
+            "type": "Buy",
+            "amount": 0.035952,
+            "value": 20
+          },
+          {
+            "type": "Sell",
+            "amount": 0.035952,
+            "value": 19.11
+          }
+        ],
+        "SQ": [
+          {
+            "type": "Buy",
+            "amount": 0.083103,
+            "value": 20
+          },
+          {
+            "type": "Sell",
+            "amount": 0.083103,
+            "value": 17.17
+          }
+        ],
+        "GE": [
+          {
+            "type": "Buy",
+            "amount": 1.527883,
+            "value": 20
+          },
+          {
+            "type": "Sell",
+            "amount": 1,
+            "value": 13.5
+          },
+          {
+            "type": "Sell",
+            "amount": 0.527883,
+            "value": 7.13
+          }
+        ],
+        "PRPL": [
+          {
+            "type": "Buy",
+            "amount": 0.036531,
+            "value": 0.95
+          },
+          {
+            "type": "Buy",
+            "amount": 1,
+            "value": 25.99
+          },
+          {
+            "type": "Buy",
+            "amount": 0.118318,
+            "value": 3.06
+          }
+        ],
+        "VTV": [
+          {
+            "type": "Buy",
+            "amount": 0.232693,
+            "value": 29.95
+          },
+          {
+            "type": "Buy",
+            "amount": 0.000388,
+            "value": 0.05
+          }
+        ],
+        "VUG": [
+          {
+            "type": "Buy",
+            "amount": 0.080358,
+            "value": 19.97
+          },
+          {
+            "type": "Buy",
+            "amount": 0.00012,
+            "value": 0.03
+          }
+        ],
+        "TSM": [
+          {
+            "type": "Buy",
+            "amount": 0.252951,
+            "value": 30
+          }
+        ],
+        "PAAS": [
+          {
+            "type": "Buy",
+            "amount": 0.593031,
+            "value": 19.98
+          },
+          {
+            "type": "Buy",
+            "amount": 0.000593,
+            "value": 0.02
+          },
+          {
+            "type": "Sell",
+            "amount": 0.593624,
+            "value": 19.77
+          }
+        ]
+      },
+      "summary": {
+        "AMD": {
+          "absoluteVolumeTransacted": 0.25,
+          "debit": 40,
+          "credit": 37.82,
+          "volumeAtTermStart": 0,
+          "yield": -5.45
+        },
+        "PRPL": {
+          "absoluteVolumeTransacted": 1.15,
+          "debit": 30,
+          "credit": 36.55,
+          "volumeAtTermStart": 0,
+          "yield": 21.83
+        },
+        "SQM": {
+          "absoluteVolumeTransacted": 0.03,
+          "debit": 39.43,
+          "credit": 39.74,
+          "volumeAtTermStart": 0.35,
+          "yield": 0.8
+        },
+        "TSM": {
+          "absoluteVolumeTransacted": 0.25,
+          "debit": 30,
+          "credit": 29.92,
+          "volumeAtTermStart": 0,
+          "yield": -0.27
+        },
+        "VTV": {
+          "absoluteVolumeTransacted": 0.23,
+          "debit": 30,
+          "credit": 30.64,
+          "volumeAtTermStart": 0,
+          "yield": 2.13
+        },
+        "VUG": {
+          "absoluteVolumeTransacted": 0.08,
+          "debit": 20,
+          "credit": 20.69,
+          "volumeAtTermStart": 0,
+          "yield": 3.45
+        },
+        "TWTR": {
+          "absoluteVolumeTransacted": 0,
+          "debit": 10,
+          "credit": 9.92,
+          "volumeAtTermStart": 0,
+          "yield": -0.8
+        },
+        "USRT": {
+          "absoluteVolumeTransacted": -0.2,
+          "debit": 10.37,
+          "credit": 10.52,
+          "volumeAtTermStart": 0.2,
+          "yield": 1.45
+        },
+        "SMH": {
+          "absoluteVolumeTransacted": 0,
+          "debit": 40,
+          "credit": 39.31,
+          "volumeAtTermStart": 0,
+          "yield": -1.72
+        },
+        "DOCU": {
+          "absoluteVolumeTransacted": 0,
+          "debit": 30,
+          "credit": 24.5,
+          "volumeAtTermStart": 0,
+          "yield": -18.33
+        },
+        "NVDA": {
+          "absoluteVolumeTransacted": 0,
+          "debit": 20,
+          "credit": 19.11,
+          "volumeAtTermStart": 0,
+          "yield": -4.45
+        },
+        "SQ": {
+          "absoluteVolumeTransacted": 0,
+          "debit": 20,
+          "credit": 17.17,
+          "volumeAtTermStart": 0,
+          "yield": -14.15
+        },
+        "GE": {
+          "absoluteVolumeTransacted": 0,
+          "debit": 20,
+          "credit": 20.63,
+          "volumeAtTermStart": 0,
+          "yield": 3.15
+        },
+        "PAAS": {
+          "absoluteVolumeTransacted": 0,
+          "debit": 20,
+          "credit": 19.77,
+          "volumeAtTermStart": 0,
+          "yield": -1.15
+        }
+      }
+    }
+  }
+}]
