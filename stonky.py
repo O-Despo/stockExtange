@@ -6,6 +6,7 @@ import json
 import uuid
 import random
 import logging
+import re
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
@@ -53,6 +54,7 @@ class stonky(discord.Client):
                 "args_are_in": None,
                 "attachments_required": None,
                 "attachment_content_type": None,
+                "meets_regex": None
                 }
 
         self.delete_codes = {}
@@ -60,6 +62,8 @@ class stonky(discord.Client):
         #db
         self.getBoardCats = ["overall", "singleStock"]
         self.start_db_connection()
+
+        self.legit_term_ptrn = re.compile("\d{4}-\d{2}")
 
     def start_db_connection(self):
         self.mongoClient = MongoClient(os.getenv("MONGO_URL"))
@@ -74,35 +78,50 @@ class stonky(discord.Client):
         get_leaderboard_malform_detect = self.default_malform_criteria.copy()
         get_leaderboard_malform_detect["number_of_args"] = 2
         get_leaderboard_malform_detect["args_are_in"] = [self.getBoardCats, None]
+        get_leaderboard_malform_detect["meets_regex"] = [self.legit_term_ptrn]
         
         malformed = self.malformDetection(get_leaderboard_malform_detect, msg)
         if malformed[0]:
             await msg.author.send("COMMAND_MALFORMED\n" + malformed[1])
             return 3
 
-        args = malformed[2]
-        
-        self.updateLeaderboard(arg[1])
-        db_response = sell.leader_col.find_one({
-            "term": args[0]
-            })
+        args = malformed[1]
+        breakpoint() 
+        db_response = self.updateLeaderboard(args[1])
+        # MOVE TO UPDAT LEADER BOARD
+        #db_response = sell.leader_col.find_one({
+        #    "term": args[0]
+        #    })
 
-        await msg.author.send(db_response["stings"][args[1]])
+        #await msg.author.send(db_response["stings"][args[1]])
+        #PICKUP FIX OUTPUT OF MSG_PARTS AND ARGS so that updateALL-Leabaords works
         return 0
+        #TODO WTP: Get leader board if finished compelte updateLeaderboard given a term updates that terms leaderboard, there should also be a gernaeral all leaderboard update at server start
 
 
-    async def updateLeaderboard(self, term):
+    async def updateAllLeaderboards(self, term):
         pass
 
+    def updateLeaderboard(self, term):
+        lb_term_prj = {f"terms.{term}": True, "discord_name": True}
+        lb_term_sort = [(f"terms.{term}.overallChange", -1)]
+        lb_term_filter = {"terms.{term}":  {"$exists": True}}
+        
+        pure_response = self.user_col.find(filter=lb_term_filter, projection=lb_term_prj, sort=lb_term_sort)
+        print(dict(pure_response)) 
+        breakpoint()
+        overall_change_w_uid = {pure_response: 9}
+        overall_change = None
+    
+                 
     def malformDetection(self, criteria, msg):
-        """detects malformation given a set of criteria"""
-        malformed = False
+        """Detect malformation given a set of criteria"""
         malformMessage = ""
 
         args = msg.clean_content.split(" ")[1:]
 
         if criteria["number_of_args"] != None:
-            num_of_args = criteria["number_of_args"]
+            number_of_args = criteria["number_of_args"]
             
             if type(number_of_args) == list:
                 #Only for development
@@ -112,15 +131,12 @@ class stonky(discord.Client):
                 
                 #code that will hit user
                 if len(args) < number_of_args[0]:
-                    malformMessage += "Not enough arguments suplied: expected minimum of {number_of_args[0]}"
+                    malformMessage += f"Not enough arguments suplied: expected minimum of {number_of_args[0]}"
                 elif len(args) < number_of_args[1]:
-                    malformMessage += "To many arguments suplied: expected maximun of {number_of_args[0]}"
+                    malformMessage += f"To many arguments suplied: expected maximun of {number_of_args[0]}"
             else:
                 if len(args) != number_of_args:
-                    malformMessage += "Incorect amount of argumnets: expected {number_of_args}"
-
-        #if criteria["type_of_args"] != None:
-        #    type_of_args = criteria["type_of_args"]
+                    malformMessage += f"Incorect amount of argumnets: expected {number_of_args}"
 
         if criteria["args_are_in"] != None:
             for i, arg in enumerate(args):
@@ -143,6 +159,22 @@ class stonky(discord.Client):
                 if attachment.content_type != criteria["attachment_content_type"]:
                     malformMessage += f"{attachment.file_name} has the wrong type expected {criteria_content_type} fot {attachment.content_type}"
 
+        if criteria["meets_regex"] != None and malformMessage == "":
+            #TODO regex list should take format of [{pattern: pattern, format: format] TODO malform should have reason
+            regex_list = criteria["meets_regex"]
+            if type(regex_list) != list:
+                self.log.ERROR("meets_regex must be suplied to criteria as list")
+                raise TypeError("please supply a list to meets regex")
+            
+            for i, pttrn in enumerate(regex_list):
+                print(args)
+                breakpoint()
+                arg = args[i]
+                pttrn_out_put = pttrn.findall(arg)
+                
+                if len(pttrn_out_put) != 1:
+                    malformMessage += {f"{arg} is malformed"}
+                    
         if malformMessage != "":
             return (False, malformMessage)
         else:
@@ -231,16 +263,14 @@ class stonky(discord.Client):
             self.log.info(f"TERM made for {msg.author.id} date {term}")
 
             await msg.author.send(f"Sucess entry made for {term}")
-            
+    
+    # THE HELL OF DELETION
     async def deleteAll(self, parsed_content, msg):
         """create a deletion confoamtion code"""
         self.checkDeleteCodeTimeouts()
 
         #Error handling
         errorMsg = ""
-        #user_has_code = self.userHasDeleteCode(msg) 
-        #TODO remove delete code timrout
-        #if user_has_code[0] == False: errorMsg += user_has_code[1]
         if self.user_col.find_one({"discord_id": msg.author.id}) == None: errorMsg += "Nothing to delete\n"
          
         if errorMsg != "":
@@ -315,11 +345,11 @@ class stonky(discord.Client):
             await msg.author.send("Information removed : CONFIRMED")
         else:
             await msg.author.send("failed contact dev")
+    # THE END OF DELETION HELL
 
     async def query(self, parsed_msg, msg):
         """returns a given query"""
-        self.possible.querys = {
-                }
+        pass 
 
     async def dmProcessMsg(self, parsed_content, msg):
         if parsed_content[0] in self.dmActions.keys():
@@ -341,7 +371,10 @@ class stonky(discord.Client):
 
     async def on_message(self, msg):
         common = {
-                "indm": self.inDm}
+                "indm": self.inDm,
+                "leaderboard": self.getLeaderboard
+                }
+
         text_content = msg.clean_content.lower()
         
         if text_content[0] != os.getenv("MSG_ID"): return
@@ -371,4 +404,3 @@ class stonky(discord.Client):
 if __name__ == "__main__":
     stonkBot = stonky()
     stonkBot.run(os.getenv("DISCORD_KEY"))
-
