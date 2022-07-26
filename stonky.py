@@ -13,12 +13,34 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class stonky(discord.Client):
+    """Sub class of discord.Client contains all logic for discord bot."""
     def __init__(self):
         super().__init__()
         self.pdf_extract= extract.pdfExtract()
         self.platforms = self.pdf_extract.platforms.keys()
         self.delete_tokens = {}
+ 
+        self.COMMANDS = {
+                "process": self.process,
+                "query": self.query,
+                "delete": self.deleteAll,
+                "deleteconfirm": self.deleteConfirm,
+                "datadownload": self.dataDownload,
+                "leaderBoard": self.getLeaderboard,
+                "stats": self.stats,
+                }       
         
+        self.default_malform_criteria = {
+                "number_of_args": None,
+                "args_are_in": None,
+                "attachments_required": None,
+                "attachment_content_type": None,
+                "meets_regex": None
+                }
+
+        #Regex pttrns for malform detection
+        self.legit_term_ptrn = re.compile("\d{4}-\d{2}")
+
         #set up logging 
         self.log = logging.getLogger(os.getenv("LOG_NAME"))
         self.log.setLevel(logging.DEBUG)
@@ -35,35 +57,11 @@ class stonky(discord.Client):
 
         with open("msg_text.json", "r") as json_in:
             self.simple_msgs = json.load(json_in)
-
-        self.dmActions = {
-                "process": self.process,
-                "query": self.query,
-                "delete": self.deleteAll,
-                "deleteconfirm": self.deleteConfirm,
-                "datadownload": self.dataDownload
-                }       
-        
-        self.actions = {
-                "leaderBoard": self.getLeaderboard,
-                "stats": self.stats
-        }
-
-        self.default_malform_criteria = {
-                "number_of_args": None,
-                "args_are_in": None,
-                "attachments_required": None,
-                "attachment_content_type": None,
-                "meets_regex": None
-                }
-
         self.delete_codes = {}
 
-        #db
+        #Connect to db
         self.getBoardCats = ["overall", "singleStock"]
         self.start_db_connection()
-
-        self.legit_term_ptrn = re.compile("\d{4}-\d{2}")
 
     def start_db_connection(self):
         self.mongoClient = MongoClient(os.getenv("MONGO_URL"))
@@ -73,8 +71,15 @@ class stonky(discord.Client):
 
         self.log.debug(f"Connected to db {os.getenv('MONGO_URL')}")
 
-    async def getLeaderboard(self, msg_parts, msg):
-        """gets the leaderboard for a given term"""
+    async def getLeaderboard(self, args, msg):
+        """Get the user request for leader baord
+        
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+        """
         get_leaderboard_malform_detect = self.default_malform_criteria.copy()
         get_leaderboard_malform_detect["number_of_args"] = 2
         get_leaderboard_malform_detect["args_are_in"] = [self.getBoardCats, None]
@@ -88,21 +93,22 @@ class stonky(discord.Client):
         args = malformed[1]
         breakpoint() 
         db_response = self.updateLeaderboard(args[1])
-        # MOVE TO UPDAT LEADER BOARD
-        #db_response = sell.leader_col.find_one({
-        #    "term": args[0]
-        #    })
-
         #await msg.author.send(db_response["stings"][args[1]])
         #PICKUP FIX OUTPUT OF MSG_PARTS AND ARGS so that updateALL-Leabaords works
         return 0
         #TODO WTP: Get leader board if finished compelte updateLeaderboard given a term updates that terms leaderboard, there should also be a gernaeral all leaderboard update at server start
 
 
-    async def updateAllLeaderboards(self, term):
+    async def updateAllLeaderboards(self):
+        """Updates every term leaderboard in the database."""
         pass
 
     def updateLeaderboard(self, term):
+        """Updates a leaderboard with the given term.
+
+        :param term: the time term to update (year-month) ex. (2022.03)
+        :type term:str
+        """
         lb_term_prj = {f"terms.{term}": True, "discord_name": True}
         lb_term_sort = [(f"terms.{term}.overallChange", -1)]
         lb_term_filter = {"terms.{term}":  {"$exists": True}}
@@ -115,7 +121,17 @@ class stonky(discord.Client):
     
                  
     def malformDetection(self, criteria, msg):
-        """Detect malformation given a set of criteria"""
+        """Detect malformation given a set of criteria returns a malformMsg and reason for malform.
+        
+        :param criteria: the criteria that the msg should conform to
+        :type criteria: dict
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+
+        :rtype: (bool, str)
+        :return: (malformed, messasage response), weither malformed, the response msg
+        """
         malformMessage = ""
 
         args = msg.clean_content.split(" ")[1:]
@@ -180,11 +196,27 @@ class stonky(discord.Client):
         else:
             return (True, "message not malformed")
 
-    async def stats(self):
+    async def stats(self, args, msg):
+        """Returns stats in a given term
+        
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+        """
+ 
         pass
 
-    async def dataDownload(self, parsed_content, msg):
-        """downloads all the data stored on the Stonky server"""
+    async def dataDownload(self, args, msg):
+        """Downloads all the data stored on the Stonky server returns it to user.
+        
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+        """
         if len(parsed_content) == 1:
             response = self.user_col.find_one({"discord_id": msg.author.id})
 
@@ -203,7 +235,15 @@ class stonky(discord.Client):
             await msg.author.send("data")
             os.remove(file_name)
 
-    async def process(self, parsed_content, msg):
+    async def process(self, args, msg):
+        """Processes the inputed file returns weither it was a sucess.
+        
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+        """
         #Error check
         self.pro_error = False
         error_msg = ""
@@ -264,9 +304,15 @@ class stonky(discord.Client):
 
             await msg.author.send(f"Sucess entry made for {term}")
     
-    # THE HELL OF DELETION
-    async def deleteAll(self, parsed_content, msg):
-        """create a deletion confoamtion code"""
+    async def deleteAll(self, args, msg):
+        """Generate a code to delele all user data
+        
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+        """
         self.checkDeleteCodeTimeouts()
 
         #Error handling
@@ -286,14 +332,24 @@ class stonky(discord.Client):
         return 1
 
     def checkDeleteCodeTimeouts(self):
-        """cleans the delete codes stack"""
+        """Cleans the delete codes stack"""
         for delete_code_item in self.delete_codes.items():
             if delete_code_item[1]["timeout"] < time.time():
                 del self.delete_codes[delete_code_item[0]]
                 self.log.debug("{msg.author.id} delete code {delete_code_item[1]['code'] removed due to timeout")
 
     def validDeleteCode(self, code, msg):
-        """verifys deletiond code returns (verifies_status:bool, msg)"""
+        """verifys deletion code ruturn if vaild.
+        
+        :param code: the code the user suplied
+        :type code: int
+
+        :param msg: the full msg class
+        :type msg: discord.Message
+
+        :rtype: (bool, str)
+        :return: (valid, return msg), weither the code is vaild, the msg to be used
+        """
         vaild = True
         returnMsg = ""
 
@@ -318,8 +374,15 @@ class stonky(discord.Client):
         
         return (hasCode, returnMsg)
         
-    async def deleteConfirm(self, parsed_content, msg):
-        """Removes all data of user after taking in verified deletion code"""
+    async def deleteConfirm(self, args, msg):
+        """Takes in valid delete code and removes all data
+
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+        """
         #Error correction
         self.checkDeleteCodeTimeouts()
         error_msg = ""
@@ -345,10 +408,16 @@ class stonky(discord.Client):
             await msg.author.send("Information removed : CONFIRMED")
         else:
             await msg.author.send("failed contact dev")
-    # THE END OF DELETION HELL
 
-    async def query(self, parsed_msg, msg):
-        """returns a given query"""
+    async def query(self, args, msg):
+        """Given a query retursn pure data
+
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
+        """
         pass 
 
     async def dmProcessMsg(self, parsed_content, msg):
@@ -363,7 +432,11 @@ class stonky(discord.Client):
             output = self.simple_msgs[parsed_content[0]]
             msg.author.send(output)
 
-    async def inDm(self, parsed_content, msg):
+    async def inDm(self, args, msg):
+        """Checks if user is in dm channel
+        
+         
+        """
         if type(msg.channel) == discord.DMChannel:
             await msg.author.send("This is a DM channel")
         else:
@@ -380,12 +453,11 @@ class stonky(discord.Client):
         if text_content[0] != os.getenv("MSG_ID"): return
         self.log.debug(f"Message recieved:{text_content}")
 
-        #clean text input
+        #Clean text input
         text_content = text_content[1:]
         text_content = text_content.replace(" ", "")
         content_parse = text_content.split(":")
 
-        #TODO remain charater 
         if content_parse[0] in self.simple_msgs:
             await msg.author.send(self.simple_msgs[content_parse[0]])
 
@@ -404,3 +476,11 @@ class stonky(discord.Client):
 if __name__ == "__main__":
     stonkBot = stonky()
     stonkBot.run(os.getenv("DISCORD_KEY"))
+"""Processes the inputed file returns weither it was a sucess.
+
+:param args: the args passed to the program
+:type args: list
+
+:param msg: the full msg object
+:type msg: discord.Message
+"""
