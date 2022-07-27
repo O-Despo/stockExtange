@@ -26,7 +26,7 @@ class stonky(discord.Client):
                 "delete": self.deleteAll,
                 "deleteconfirm": self.deleteConfirm,
                 "datadownload": self.dataDownload,
-                "leaderBoard": self.getLeaderboard,
+                "leaderboard": self.getLeaderboard,
                 "stats": self.stats,
                 }       
         
@@ -41,7 +41,14 @@ class stonky(discord.Client):
         #Regex pttrns for malform detection
         self.legit_term_ptrn = re.compile("\d{4}-\d{2}")
 
-        #set up logging 
+        #start logging
+        self.start_logging()
+
+        #Connect to db
+        self.start_db_connection()
+
+    def start_logging(self):
+        """sets up logging"""
         self.log = logging.getLogger(os.getenv("LOG_NAME"))
         self.log.setLevel(logging.DEBUG)
 
@@ -55,21 +62,35 @@ class stonky(discord.Client):
         self.file_log.setFormatter(formatter)
         self.stream_log.setFormatter(formatter)
 
-        with open("msg_text.json", "r") as json_in:
-            self.simple_msgs = json.load(json_in)
-        self.delete_codes = {}
-
-        #Connect to db
-        self.getBoardCats = ["overall", "singleStock"]
-        self.start_db_connection()
-
     def start_db_connection(self):
+        """Starts the database connection."""
         self.mongoClient = MongoClient(os.getenv("MONGO_URL"))
         self.db = self.mongoClient[os.getenv("DB")]
         self.user_col = self.db["users"]
         self.records_col = self.db["records"]
 
         self.log.debug(f"Connected to db {os.getenv('MONGO_URL')}")
+
+    async def on_message(self, msg):
+        """Given that the message has a vaild command runs command otherwise runs help
+
+        :param msg: the msg recieved by the bot
+        :type msg: discord.Message
+        """
+        text_content = msg.clean_content.lower()
+        
+        if text_content[0] != os.getenv("MSG_ID"): return
+        self.log.debug(f"Message recieved:{text_content}")
+
+        #Clean text input
+        text_content = text_content[1:]
+        text_content = text_content.replace(" ", "")
+        args = text_content.split(":")
+
+        if args[0] in self.COMMANDS.keys():
+            await self.COMMANDS[args[0]](args, msg)
+        else:
+            await msg.author.send("HELP") 
 
     async def getLeaderboard(self, args, msg):
         """Get the user request for leader baord
@@ -79,28 +100,35 @@ class stonky(discord.Client):
 
         :param msg: the full msg object
         :type msg: discord.Message
+
+        :rtype: int
+        :return: 1 if falied 0 is sucess
         """
         get_leaderboard_malform_detect = self.default_malform_criteria.copy()
         get_leaderboard_malform_detect["number_of_args"] = 2
-        get_leaderboard_malform_detect["args_are_in"] = [self.getBoardCats, None]
-        get_leaderboard_malform_detect["meets_regex"] = [self.legit_term_ptrn]
+        get_leaderboard_malform_detect["meets_regex"] = [None, self.legit_term_ptrn]
         
-        malformed = self.malformDetection(get_leaderboard_malform_detect, msg)
+        malformed = self.malformDetection(get_leaderboard_malform_detect, args, msg)
         if malformed[0]:
             await msg.author.send("COMMAND_MALFORMED\n" + malformed[1])
-            return 3
+            return 1
 
-        args = malformed[1]
-        breakpoint() 
         db_response = self.updateLeaderboard(args[1])
-        #await msg.author.send(db_response["stings"][args[1]])
-        #PICKUP FIX OUTPUT OF MSG_PARTS AND ARGS so that updateALL-Leabaords works
         return 0
-        #TODO WTP: Get leader board if finished compelte updateLeaderboard given a term updates that terms leaderboard, there should also be a gernaeral all leaderboard update at server start
 
-
-    async def updateAllLeaderboards(self):
+    def updateAllLeaderboards(self):
         """Updates every term leaderboard in the database."""
+        pass
+
+    def buildLeaderboard(self, term):
+        """Build the leaderbaords from scractch given a term
+ 
+        :param term: the time term to update (year-month) ex. (2022.03)
+        :type term:str           
+
+        :rtype: dict
+        :return: the build leader baord
+        """
         pass
 
     def updateLeaderboard(self, term):
@@ -111,20 +139,24 @@ class stonky(discord.Client):
         """
         lb_term_prj = {f"terms.{term}": True, "discord_name": True}
         lb_term_sort = [(f"terms.{term}.overallChange", -1)]
-        lb_term_filter = {"terms.{term}":  {"$exists": True}}
+        lb_term_filter = {f"terms.{term}":  {"$exists": True}}
         
         pure_response = self.user_col.find(filter=lb_term_filter, projection=lb_term_prj, sort=lb_term_sort)
-        print(dict(pure_response)) 
-        breakpoint()
-        overall_change_w_uid = {pure_response: 9}
+        pure_response["terms"]
+
+        for response_item in pure_response:
+            pass
+
         overall_change = None
-    
                  
-    def malformDetection(self, criteria, msg):
+    def malformDetection(self, criteria, args, msg):
         """Detect malformation given a set of criteria returns a malformMsg and reason for malform.
         
         :param criteria: the criteria that the msg should conform to
         :type criteria: dict
+
+        :param args: the args passed to the program
+        :type args: list
 
         :param msg: the full msg object
         :type msg: discord.Message
@@ -134,11 +166,8 @@ class stonky(discord.Client):
         """
         malformMessage = ""
 
-        args = msg.clean_content.split(" ")[1:]
-
         if criteria["number_of_args"] != None:
             number_of_args = criteria["number_of_args"]
-            
             if type(number_of_args) == list:
                 #Only for development
                 if len(number_of_args) != 2:
@@ -183,8 +212,9 @@ class stonky(discord.Client):
                 raise TypeError("please supply a list to meets regex")
             
             for i, pttrn in enumerate(regex_list):
-                print(args)
-                breakpoint()
+                if pttrn == None:
+                    continue
+
                 arg = args[i]
                 pttrn_out_put = pttrn.findall(arg)
                 
@@ -192,9 +222,9 @@ class stonky(discord.Client):
                     malformMessage += {f"{arg} is malformed"}
                     
         if malformMessage != "":
-            return (False, malformMessage)
+            return (True, malformMessage)
         else:
-            return (True, "message not malformed")
+            return (False, "message not malformed")
 
     async def stats(self, args, msg):
         """Returns stats in a given term
@@ -217,7 +247,7 @@ class stonky(discord.Client):
         :param msg: the full msg object
         :type msg: discord.Message
         """
-        if len(parsed_content) == 1:
+        if len(args) == 1:
             response = self.user_col.find_one({"discord_id": msg.author.id})
 
             if response == None:
@@ -244,13 +274,12 @@ class stonky(discord.Client):
         :param msg: the full msg object
         :type msg: discord.Message
         """
-        #Error check
         self.pro_error = False
         error_msg = ""
 
-        if len(parsed_content) < 2:
+        if len(args) < 2:
             error_msg += f"provided platform after semicolon `process:PLATFORM`\nThe available plaltforms are {self.platforms}\n"
-        elif parsed_content[1] not in self.platforms:
+        elif args[1] not in self.platforms:
             error_msg += f"The platform provided is not available\nThe available plaltforms are {self.platforms}\n"
 
         #Error handleing
@@ -272,7 +301,7 @@ class stonky(discord.Client):
         else:
             file_name = "temp/" + str(uuid.uuid1()) + ".pdf" 
             await msg.attachments[0].save(file_name)
-            data = self.pdf_extract.run(file_name, parsed_content[1])
+            data = self.pdf_extract.run(file_name, args[1])
             
             os.remove(file_name)
             
@@ -282,16 +311,29 @@ class stonky(discord.Client):
             user_entry = self.user_col.find_one({"discord_id": msg.author.id})
             
             #check if term already enterned  
-            if "o" in parsed_content: overwite = True
+            if "o" in args: overwite = True
             else: overwite = False
 
             if user_entry and term in user_entry["terms"].keys() and overwite == False:
                 await msg.author.send(f"the term {term} has already been added add `:o` to overwrite the term")
                 return
 
+            #Sort summary based on overall yeild
+            yeild_index_dict = {info["yield"]:stock for (stock, info) in data["summary"].items()}
+            yeild_list = list(yeild_index_dict.keys())
+            yeild_list.sort()
+            yeild_list.reverse()
+            
+            new_summary = {}
+            for yeild in yeild_list:
+                new_summary[yeild_index_dict[yeild]] = data["summary"][yeild_index_dict[yeild]]
+            
+            data["summary"] = new_summary
+                
             if user_entry == None:
                 user_entry = {
                         "discord_id": msg.author.id,
+                        "discord_name": msg.author.name,
                         "terms": term_entry
                         }
                 self.user_col.insert_one(user_entry)
@@ -348,7 +390,7 @@ class stonky(discord.Client):
         :type msg: discord.Message
 
         :rtype: (bool, str)
-        :return: (valid, return msg), weither the code is vaild, the msg to be used
+        :return: (valid, returnMsg), wether the code is vaild, the msg to be used in response
         """
         vaild = True
         returnMsg = ""
@@ -364,7 +406,14 @@ class stonky(discord.Client):
         return (vaild, returnMsg)
             
     def userHasDeleteCode(self, msg):
-        """checks if a user already has a deletion code"""
+        """Checks if a user already has a deletion code
+        
+        :param msg: the full msg object
+        :type msg: discord.Message
+
+        :rtype: (bool, msg)
+        :return: (hasCode, returnMsg), wether the user has a code, the msg to be used in response
+        """
         hasCode = False
         returnMsg = ""
 
@@ -387,12 +436,12 @@ class stonky(discord.Client):
         self.checkDeleteCodeTimeouts()
         error_msg = ""
        
-        if len(parsed_content) != 2:
+        if len(args) != 2:
             error_msg += "please ensure the command takes the form deleteConfirm:code"
             await msg.author.send(error_msg)
             return 0
         
-        code = parsed_content[1]
+        code = args[1]
         valid_code = self.validDeleteCode(code, msg)
         if valid_code[0] == False:
             error_msg += valid_code[1]
@@ -402,7 +451,7 @@ class stonky(discord.Client):
         delele_outcome = self.user_col.find_one_and_delete({"discord_id": msg.author.id})
         if delele_outcome == None:
             await msg.author.send("your information has already been removed from or was never on our servers")
-        self.log.debug(f"{msg.author.id} deleted all data useing code {parsed_content[1]})")
+        self.log.debug(f"{msg.author.id} deleted all data useing code {args[1]})")
 
         if self.user_col.find_one({"discord_id": msg.author.id}) == None: 
             await msg.author.send("Information removed : CONFIRMED")
@@ -420,56 +469,19 @@ class stonky(discord.Client):
         """
         pass 
 
-    async def dmProcessMsg(self, parsed_content, msg):
-        if parsed_content[0] in self.dmActions.keys():
-            func = self.dmActions[parsed_content[0]]
-            await func(parsed_content, msg)
-        else:
-            await msg.author.send(self.simple_msgs["help"])
-
-    async def serverProcessMsg(self, parsed_content, msg):
-        if parsed_content[0] in self.simple_msgs.keys():
-            output = self.simple_msgs[parsed_content[0]]
-            msg.author.send(output)
-
     async def inDm(self, args, msg):
-        """Checks if user is in dm channel
-        
-         
+        """Given a query retursn pure data
+
+        :param args: the args passed to the program
+        :type args: list
+
+        :param msg: the full msg object
+        :type msg: discord.Message
         """
         if type(msg.channel) == discord.DMChannel:
             await msg.author.send("This is a DM channel")
         else:
             await msg.author.send("This is NOT a DM channel")
-
-    async def on_message(self, msg):
-        common = {
-                "indm": self.inDm,
-                "leaderboard": self.getLeaderboard
-                }
-
-        text_content = msg.clean_content.lower()
-        
-        if text_content[0] != os.getenv("MSG_ID"): return
-        self.log.debug(f"Message recieved:{text_content}")
-
-        #Clean text input
-        text_content = text_content[1:]
-        text_content = text_content.replace(" ", "")
-        content_parse = text_content.split(":")
-
-        if content_parse[0] in self.simple_msgs:
-            await msg.author.send(self.simple_msgs[content_parse[0]])
-
-        elif content_parse[0] in common.keys():
-            await common[content_parse[0]](content_parse, msg)
-
-        else:
-            if type(msg.channel) == discord.DMChannel:
-                await self.dmProcessMsg(content_parse, msg) 
-            else:
-                await self.serverProcessMsg(content_parse, msg)
- 
     async def on_connect(self):
         self.log.debug("Connected to discord")
    
