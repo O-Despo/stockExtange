@@ -143,12 +143,36 @@ class stonky(discord.Client):
         
         pure_response = self.user_col.find(filter=lb_term_filter, projection=lb_term_prj, sort=lb_term_sort)
         pure_response["terms"]
+        
+        leaderbaord = {
+                "overall_change": {},
+                "single_stock_change": {},
+                "str_out": ""
+        }
 
-        for response_item in pure_response:
-            pass
+        
+        single_stock_unsorted_dict = {}
+        single_stock_sorted_dict = {}
 
-        overall_change = None
-                 
+        overall_change_unsorted_dict = {}
+        overall_change_sorted_dict = {}
+
+        for user_response in pure_response:
+            term_response = user_response["term"][term]
+            #This will later be sorted 
+            most_profatible_ticker = term_response["summary"].keys()[0]
+            stock_obj = term_response["summary"][most_profatible_ticker]
+            single_stock_unsorted_dict[stock_obj["yield"]] = {
+                        "ticker": most_profatible_ticker,
+                        "user": user_response["discord_id"]
+                    }
+            
+            #Do the same for overall change 
+            overall_chage = term_response["overallChange"]
+            overall_chage = {
+                        "user": user_response["discord_id"]
+                    }
+
     def malformDetection(self, criteria, args, msg):
         """Detect malformation given a set of criteria returns a malformMsg and reason for malform.
         
@@ -319,17 +343,16 @@ class stonky(discord.Client):
                 return
 
             #Sort summary based on overall yeild
-            yeild_index_dict = {info["yield"]:stock for (stock, info) in data["summary"].items()}
-            yeild_list = list(yeild_index_dict.keys())
-            yeild_list.sort()
-            yeild_list.reverse()
-            
             new_summary = {}
-            for yeild in yeild_list:
-                new_summary[yeild_index_dict[yeild]] = data["summary"][yeild_index_dict[yeild]]
+            sorted_summary = sorted(data["summary"].items(), key=lambda stock: stock[1]["yield"], reverse=True)
+
+            for stock in sorted_summary:
+                new_summary[stock[0]] = stock[1]
+
+            print(new_summary)
             
             data["summary"] = new_summary
-                
+
             if user_entry == None:
                 user_entry = {
                         "discord_id": msg.author.id,
