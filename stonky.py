@@ -194,7 +194,7 @@ class stonky(discord.Client):
                 "overall_change": overall_change[2]
             }
 
-            if i <= 5: leaderbaord["str_out"] += f"{i+1}. {overall_change[1]} - {single_stock[2]}\n"
+            if i <= 5: leaderbaord["str_out"] += f"{i+1}. {overall_change[1]} - {overall_change[2]}\n"
 
         print(leaderbaord)
         self.db["leaderbaords"].replace_one({"term": term}, leaderbaord, bypass_document_validation=True)
