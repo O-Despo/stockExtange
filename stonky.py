@@ -1,3 +1,4 @@
+from numpy import single
 import extract
 import time
 import discord
@@ -104,17 +105,14 @@ class stonky(discord.Client):
         :rtype: int
         :return: 1 if falied 0 is sucess
         """
-        get_leaderboard_malform_detect = self.default_malform_criteria.copy()
-        get_leaderboard_malform_detect["number_of_args"] = 2
-        get_leaderboard_malform_detect["meets_regex"] = [None, self.legit_term_ptrn]
-        
-        malformed = self.malformDetection(get_leaderboard_malform_detect, args, msg)
-        if malformed[0]:
-            await msg.author.send("COMMAND_MALFORMED\n" + malformed[1])
-            return 1
 
-        db_response = self.updateLeaderboard(args[1])
-        return 0
+        response = self.db["leaderbaords"].find_one({"term": args[1]})
+        self.updateLeaderboard(args[1])
+
+        if response == None:
+            await msg.author.send("This term dose not have a leader board")
+        else:
+            await msg.author.send(response["str_out"])
 
     def updateAllLeaderboards(self):
         """Updates every term leaderboard in the database."""
@@ -131,48 +129,78 @@ class stonky(discord.Client):
         """
         pass
 
-    def updateLeaderboard(self, term):
+    def updateLeaderboard(self, term:str):
         """Updates a leaderboard with the given term.
 
         :param term: the time term to update (year-month) ex. (2022.03)
         :type term:str
         """
-        lb_term_prj = {f"terms.{term}": True, "discord_name": True}
+        lb_term_prj = {f"terms.{term}": True, "discord_name": True, "discord_id": True}
         lb_term_sort = [(f"terms.{term}.overallChange", -1)]
         lb_term_filter = {f"terms.{term}":  {"$exists": True}}
         
         pure_response = self.user_col.find(filter=lb_term_filter, projection=lb_term_prj, sort=lb_term_sort)
-        pure_response["terms"]
+        if pure_response == None: return 0
         
         leaderbaord = {
+                "term": term,
                 "overall_change": {},
                 "single_stock_change": {},
-                "str_out": ""
+                "str_out":""
         }
-
-        
-        single_stock_unsorted_dict = {}
-        single_stock_sorted_dict = {}
-
-        overall_change_unsorted_dict = {}
-        overall_change_sorted_dict = {}
+         
+        single_stock_list = []
+        overall_change_list = []
 
         for user_response in pure_response:
-            term_response = user_response["term"][term]
+            term_response = user_response["terms"][term]
             #This will later be sorted 
-            most_profatible_ticker = term_response["summary"].keys()[0]
+            most_profatible_ticker = list(term_response["summary"].keys())[0]
             stock_obj = term_response["summary"][most_profatible_ticker]
-            single_stock_unsorted_dict[stock_obj["yield"]] = {
-                        "ticker": most_profatible_ticker,
-                        "user": user_response["discord_id"]
-                    }
+            single_stock_list.append((
+                most_profatible_ticker,
+                user_response["discord_id"],
+                user_response["discord_name"],
+                stock_obj["yield"]
+                ))
             
             #Do the same for overall change 
-            overall_chage = term_response["overallChange"]
-            overall_chage = {
-                        "user": user_response["discord_id"]
-                    }
+            overall_change = term_response["overallChange"]
+            overall_change_list.append((
+                user_response["discord_id"],
+                user_response["discord_name"],
+                overall_change 
+                ))
+        
+        single_stock_list = sorted(single_stock_list, key=lambda item: item[3], reverse=True)
+        overall_change_list = sorted(overall_change_list, key=lambda item: item[2], reverse=True)
 
+        leaderbaord["str_out"] = f"Leaderboard for {term}\n\n"
+        leaderbaord["str_out"] += f"Single stock growth:\n"
+
+        for i, single_stock in enumerate(single_stock_list):
+            leaderbaord["single_stock_change"][str(single_stock[1])] = {
+                "ticker": single_stock[0],
+                "discord_name": single_stock[2],
+                "overall_change": single_stock[3]
+            }
+            
+            if i <= 5: leaderbaord["str_out"] += f"{i+1}. {single_stock[2]} - {single_stock[0]}:{single_stock[3]}\n"
+        
+        leaderbaord["str_out"] += f"\nOverall growth:\n"
+        for i, overall_change in enumerate(overall_change_list):
+            leaderbaord["overall_change"][str(overall_change[0])] = {
+                "discord_name": overall_change[1],
+                "overall_change": overall_change[2]
+            }
+
+            if i <= 5: leaderbaord["str_out"] += f"{i+1}. {overall_change[1]} - {single_stock[2]}\n"
+
+        print(leaderbaord)
+        self.db["leaderbaords"].replace_one({"term": term}, leaderbaord, bypass_document_validation=True)
+
+        ##PICKUP ADD STRING AND ADD Fake data
+            
     def malformDetection(self, criteria, args, msg):
         """Detect malformation given a set of criteria returns a malformMsg and reason for malform.
         
