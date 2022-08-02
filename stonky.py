@@ -7,6 +7,7 @@ import json
 import uuid
 import random
 import logging
+import csv
 import re
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -69,6 +70,7 @@ class stonky(discord.Client):
         self.db = self.mongoClient[os.getenv("DB")]
         self.user_col = self.db["users"]
         self.records_col = self.db["records"]
+        self.data = self.db["data"]
 
         self.log.debug(f"Connected to db {os.getenv('MONGO_URL')}")
 
@@ -513,12 +515,61 @@ class stonky(discord.Client):
         """Given a query retursn pure data
 
         :param args: the args passed to the program
-        :type args: list
+        :type args: list [0] = Term [1] = ("summary"|"transaction"|"portstart")
 
         :param msg: the full msg object
         :type msg: discord.Message
         """
-        pass 
+
+        self.transaction_process = lambda transaction_dict: [[t[0], t[1], t[2]] for t in transaction_dict.items()]
+        self.port_info_process = lambda port_dict: [[t[0], t[1], t[2]] for t in port_dict.values()]
+        self.summary_process = lambda sum_dict: [(t[0], t[1]["absoluteVolumeTransacted"], t[1]["debit"], t[1]["credit"], t[1]["yield"]) for t in sum_dict.items()]
+        catagorie_map_dict = {
+            "summary": ("summary", self.summary_process),
+            "transaction": ("transactionHistory", self.transaction_process),
+            "portstart": ("portInfo", self.port_info_process),
+        }
+
+        try:        
+            assert len(args) == 3, f"There must be 2 arguments provided {len(args)-1} found"
+            term = args[1]
+            sub_cat = args[2]
+
+            assert sub_cat.lower() in catagorie_map_dict.keys(), f"Query failed {sub_cat} did not map to any of the values {list(catagorie_map_dict.keys())}"
+            mapped_cat = catagorie_map_dict[sub_cat.lower()][0]
+            selected_function = catagorie_map_dict[sub_cat.lower()][1]
+
+            query_project = {
+                f"terms.{term}.{mapped_cat}": True,
+                "discord_id": True,
+                "discord_name": True
+            }
+
+            query_filter={
+                f'terms.2021-03s': {
+                    '$exists': True
+                }
+            }
+                
+            response = self.user_col.find(filter=query_filter)
+            assert response != None, f"There is not data for term {term}"
+            #PICKPUP wokring on why response is not valid
+            target_data = response["terms"][term][mapped_cat]
+            for dict_item in target_data:
+                print(selected_function(dict_item))
+
+            breakpoint()
+            # file_name = str(uuid.uuid1()) + ".csv"
+            # with open(file_name, "w+") as csv_out:
+
+            # discord_file = discord.File(file_name)
+            # await msg.author.send(file=discord_file)
+            # await msg.author.send("data")
+            # os.remove(file_name)
+
+        except AssertionError as error:
+            self.log.debug(error)
+            await msg.author.send(error)
 
     async def inDm(self, args, msg):
         """Given a query retursn pure data
